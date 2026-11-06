@@ -103,6 +103,19 @@ h1 .grad-text,h2 .grad-text{animation:shine 3s linear infinite,hueText 9s linear
 .orbit-item{position:absolute;left:50%;top:50%;width:0;height:0;transform:rotate(var(--r)) translateX(120px) }
 .orbit-item span{display:block;width:36px;height:36px;margin:-18px;text-align:center;line-height:36px;font-size:26px;animation:counterOrbit 7s linear infinite;filter:drop-shadow(0 0 8px rgba(236,72,153,.7))}
 .magnet:active{animation:ripple .6s ease-out}
+
+@keyframes shake{0%,100%{transform:translate(0,0) rotate(0)}10%{transform:translate(-6px,4px) rotate(-1deg)}20%{transform:translate(6px,-4px) rotate(1deg)}30%{transform:translate(-5px,-3px) rotate(-.6deg)}40%{transform:translate(5px,3px) rotate(.6deg)}50%{transform:translate(-3px,5px)}60%{transform:translate(3px,-5px)}70%{transform:translate(-2px,2px)}}
+@keyframes bigSpin{from{transform:rotate(0) scale(1)}50%{transform:rotate(180deg) scale(1.15)}to{transform:rotate(360deg) scale(1)}}
+@keyframes flashHue{0%,100%{filter:hue-rotate(0)}50%{filter:hue-rotate(180deg) saturate(2)}}
+@keyframes vibeWord{from{transform:translate(-50%,-50%) rotate(-12deg)}to{transform:translate(-50%,-50%) rotate(348deg)}}
+.vibe-word{position:fixed;top:50%;left:50%;font-family:"Space Grotesk",sans-serif;font-weight:900;font-size:22vw;white-space:nowrap;color:transparent;-webkit-text-stroke:2px rgba(236,72,153,.18);pointer-events:none;z-index:-4;animation:vibeWord 40s linear infinite}
+.shaking{animation:shake .5s linear}
+.big-spin{animation:bigSpin 1.2s ease-in-out}
+body.flash{animation:flashHue .8s linear}
+h2 .h2-letter:hover{animation:bobble .4s ease-in-out infinite;color:#facc15}
+a:hover .font-display{text-shadow:0 0 12px #ec4899,0 0 24px #a855f7}
+.confetti{position:fixed;top:-40px;pointer-events:none;z-index:9997;font-size:26px;animation:emojiUp linear forwards;animation-name:confettiFall}
+@keyframes confettiFall{0%{transform:translateY(0) rotate(0);opacity:1}100%{transform:translateY(115vh) rotate(1080deg);opacity:0}}
 </style>
 </head>
 <body>
@@ -411,6 +424,63 @@ console.log('%c✨ hi from simply ✨','font-size:28px;background:linear-gradien
     document.body.appendChild(e);
     setTimeout(function () { e.remove(); }, dur * 1000);
   }, 700);
+})();
+(function () {
+  var big = document.createElement("div");
+  big.className = "vibe-word";
+  big.textContent = "VIBES ✦ VIBES ✦ VIBES";
+  document.body.prepend(big);
+
+  var burst = function (count) {
+    var emojis = ["🎉", "✨", "💜", "🌈", "🚀", "🔥", "🐟", "💖", "⭐", "🎧"];
+    for (var i = 0; i < count; i++) {
+      (function (n) {
+        setTimeout(function () {
+          var c = document.createElement("span");
+          c.className = "confetti";
+          c.textContent = emojis[Math.random() * emojis.length | 0];
+          c.style.left = (Math.random() * 100) + "vw";
+          c.style.animationDuration = (3 + Math.random() * 3) + "s";
+          document.body.appendChild(c);
+          setTimeout(function () { c.remove(); }, 6500);
+        }, n * 40);
+      })(i);
+    }
+  };
+  setTimeout(function () { burst(120); }, 900);
+
+  var shake = function (el) {
+    el.classList.remove("shaking");
+    void el.offsetWidth;
+    el.classList.add("shaking");
+    setTimeout(function () { el.classList.remove("shaking"); }, 520);
+  };
+  var nameEl = document.getElementById("name");
+  if (nameEl) nameEl.addEventListener("click", function () { shake(document.getElementById("home")); burst(60); });
+
+  document.querySelectorAll("section h2").forEach(function (h) {
+    h.addEventListener("click", function () {
+      h.classList.remove("big-spin");
+      void h.offsetWidth;
+      h.classList.add("big-spin");
+    });
+  });
+
+  setInterval(function () {
+    document.body.classList.add("flash");
+    setTimeout(function () { document.body.classList.remove("flash"); }, 800);
+  }, 12000);
+
+  document.querySelectorAll(".glass").forEach(function (card) {
+    card.addEventListener("dblclick", function () { burst(40); });
+  });
+
+  var ctrl = [];
+  var konami = "ArrowUp,ArrowUp,ArrowDown,ArrowDown,ArrowLeft,ArrowRight,ArrowLeft,ArrowRight,b,a";
+  addEventListener("keydown", function (e) {
+    ctrl = ctrl.concat(e.key).slice(-10);
+    if (ctrl.join() === konami) burst(200);
+  });
 })();
 </script>
 </body>
