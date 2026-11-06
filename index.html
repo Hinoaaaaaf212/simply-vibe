@@ -83,6 +83,26 @@ body::after{content:"";position:fixed;inset:0;background-image:linear-gradient(#
 #artist-list .rank { width: 1.6em; font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: 1.5rem; background: linear-gradient(90deg,#a855f7,#ec4899,#fb923c); -webkit-background-clip: text; background-clip: text; color: transparent; }
 #artist-list .name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: 1.25rem; }
 #artist-list .plays { font-family: "JetBrains Mono", monospace; font-size: .8rem; color: rgba(233,213,255,.7); white-space: nowrap; }
+
+@keyframes wiggle{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}
+@keyframes bobble{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-12px) scale(1.07)}}
+@keyframes emojiUp{0%{transform:translateY(0) rotate(0) scale(.6);opacity:0}10%{opacity:.9}90%{opacity:.7}100%{transform:translateY(-115vh) rotate(900deg) scale(1.3);opacity:0}}
+@keyframes orbit{to{transform:rotate(360deg)}}
+@keyframes counterOrbit{to{transform:rotate(-360deg)}}
+@keyframes hueText{to{filter:hue-rotate(360deg)}}
+@keyframes squish{0%,100%{transform:scale(1,1)}30%{transform:scale(1.25,.75)}55%{transform:scale(.8,1.2)}80%{transform:scale(1.05,.97)}}
+@keyframes ripple{0%{box-shadow:0 0 0 0 rgba(236,72,153,.6)}100%{box-shadow:0 0 0 30px rgba(236,72,153,0)}}
+.h2-letter{display:inline-block;animation:bobble 1.6s ease-in-out infinite;animation-delay:var(--d)}
+.h2-letter.sp{width:.3em}
+h1 .grad-text,h2 .grad-text{animation:shine 3s linear infinite,hueText 9s linear infinite}
+.idle-wobble{display:inline-block;animation:wiggle 2.6s ease-in-out infinite;animation-delay:var(--d,0s)}
+.tilt:hover .idle-wobble{animation:squish .7s ease-in-out infinite}
+.hero-chip{animation:bobble 3.2s ease-in-out infinite;animation-delay:var(--d,0s)}
+.emo{position:fixed;bottom:-70px;pointer-events:none;z-index:-2;font-size:30px;animation:emojiUp linear forwards;user-select:none}
+.orbit-wrap{position:absolute;inset:-28px;animation:orbit 7s linear infinite;pointer-events:none}
+.orbit-item{position:absolute;left:50%;top:50%;width:0;height:0;transform:rotate(var(--r)) translateX(120px) }
+.orbit-item span{display:block;width:36px;height:36px;margin:-18px;text-align:center;line-height:36px;font-size:26px;animation:counterOrbit 7s linear infinite;filter:drop-shadow(0 0 8px rgba(236,72,153,.7))}
+.magnet:active{animation:ripple .6s ease-out}
 </style>
 </head>
 <body>
@@ -330,6 +350,67 @@ console.log('%c✨ hi from simply ✨','font-size:28px;background:linear-gradien
     });
     document.getElementById("top").hidden = false;
   }).catch(function () {});
+})();
+(function () {
+  var wrap = function (node) {
+    var frag = document.createDocumentFragment();
+    var i = 0;
+    Array.prototype.forEach.call(node.textContent, function (ch) {
+      var span = document.createElement("span");
+      span.className = ch === " " ? "h2-letter sp" : "h2-letter";
+      span.style.setProperty("--d", (i * 0.07).toFixed(2) + "s");
+      span.textContent = ch === " " ? " " : ch;
+      frag.appendChild(span);
+      i++;
+    });
+    node.parentNode.replaceChild(frag, node);
+  };
+  document.querySelectorAll("h2").forEach(function (h2) {
+    var nodes = [];
+    var walker = document.createTreeWalker(h2, NodeFilter.SHOW_TEXT);
+    while (walker.nextNode()) {
+      var n = walker.currentNode;
+      if (n.textContent.trim() && !(n.parentNode.closest && n.parentNode.closest(".glitch"))) nodes.push(n);
+    }
+    nodes.forEach(wrap);
+  });
+
+  document.querySelectorAll(".glass.rounded-full").forEach(function (chip, i) {
+    chip.classList.add("hero-chip");
+    chip.style.setProperty("--d", (i * 0.4).toFixed(2) + "s");
+  });
+  document.querySelectorAll(".tilt .text-6xl, .tilt .text-5xl").forEach(function (icon, i) {
+    icon.classList.add("idle-wobble");
+    icon.style.setProperty("--d", (i * 0.3).toFixed(2) + "s");
+  });
+
+  var ring = document.querySelector(".ring");
+  if (ring) {
+    var orbit = document.createElement("div");
+    orbit.className = "orbit-wrap";
+    ["🚀", "✨", "💜", "🐟", "⭐", "🔥"].forEach(function (emoji, i) {
+      var item = document.createElement("div");
+      item.className = "orbit-item";
+      item.style.setProperty("--r", (i * 60) + "deg");
+      var span = document.createElement("span");
+      span.textContent = emoji;
+      item.appendChild(span);
+      orbit.appendChild(item);
+    });
+    ring.appendChild(orbit);
+  }
+
+  var rainEmoji = ["✨", "💜", "⭐", "🚀", "💖", "🔥", "🌈", "🐟", "🎧", "🎮"];
+  setInterval(function () {
+    var e = document.createElement("span");
+    e.className = "emo";
+    e.textContent = rainEmoji[Math.random() * rainEmoji.length | 0];
+    e.style.left = (Math.random() * 100) + "vw";
+    var dur = 9 + Math.random() * 8;
+    e.style.animationDuration = dur + "s";
+    document.body.appendChild(e);
+    setTimeout(function () { e.remove(); }, dur * 1000);
+  }, 700);
 })();
 </script>
 </body>
